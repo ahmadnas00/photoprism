@@ -45,6 +45,14 @@
             <v-icon v-show="interval" size="16" color="white">pause</v-icon>
           </button>
 
+
+          <!-- New QR Code Button -->
+          <button class="pswp__button action-qrcode" style="background: none" :title="$gettext('Generate QR Code')" @click.exact="generateQRCode">
+            <v-icon size="16" color="white">qr_code</v-icon>
+          </button>
+
+
+
           <div class="pswp__preloader">
             <div class="pswp__preloader__icn">
               <div class="pswp__preloader__cut">
