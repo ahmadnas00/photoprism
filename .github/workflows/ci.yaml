@@ -54,11 +54,8 @@ jobs:
 
       # ✅ Run Specific Photo Tests (ONLY 3 tests)
       - name: Run Only Specific Photo Tests
-        run: |
-          mkdir -p test-results  # ✅ Ensure test results directory exists
-          npx mocha frontend/tests/unit/model/photo_test.js \
-            --grep "should get photo (entity name|uuid|title)" \
-            --reporter json --reporter-options output=test-results/results.json
+        run: npx mocha frontend/tests/unit/model/photo_test.js --grep "should get photo (entity name|uuid|title)" --loader ts-node/esm
+
 
       # ✅ Push Docker Image to DockerHub (ONLY if all tests pass)
       - name: Push Docker Image to DockerHub
@@ -67,14 +64,3 @@ jobs:
           docker tag photoprism-app ${{ secrets.DOCKERHUB_USERNAME }}/photoprism-app:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/photoprism-app:latest
 
-      # ✅ Upload test results (fixed path)
-      - name: Upload test results (optional)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: test-results/results.json  # ✅ Fixed path
-
-      # ✅ Logout from DockerHub
-      - name: Logout from DockerHub
-        run: docker logout
