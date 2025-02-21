@@ -54,7 +54,7 @@ jobs:
 
       # ✅ Run Specific Photo Tests (ONLY 3 tests)
       - name: Run Only Specific Photo Tests
-        run: npx mocha frontend/tests/unit/model/photo_test.js --grep "should get photo (entity name|uuid|title)" --loader ts-node/esm
+        run: npx mocha frontend/tests/unit/model/photo_test.js --grep "should get photo (entity name|uuid|title)" --require ts-node/register
 
 
       # ✅ Push Docker Image to DockerHub (ONLY if all tests pass)
