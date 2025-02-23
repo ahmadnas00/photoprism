@@ -3,11 +3,11 @@ name: Build and Run Environment Tests
 on:
   push:
     branches:
-      - feature/my_feature  # Runs only on this branch
+      - feature/my_feature
   pull_request:
 
 jobs:
-  test:
+  Build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,6 +18,12 @@ jobs:
           sudo apt update
           sudo apt install -y make chromium-browser
           npm install  # Ensure dependencies are installed
+
+      - name: Ensure storage directory exists
+        run: |
+          mkdir -p storage
+          cd storage
+          wget -c https://dl.photoprism.app/qa/acceptance.tar.gz -O - | tar -xz
 
       - name: Run only authentication and sharing tests
         run: |
