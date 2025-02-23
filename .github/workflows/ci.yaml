@@ -3,7 +3,7 @@ name: Build & Test PhotoPrism
 on:
   push:
     branches:
-      - feature/my_feature  # ✅ Make sure this is the correct branch
+      - feature/my_feature
   pull_request:
     branches:
       - feature/my_feature
@@ -51,6 +51,13 @@ jobs:
       # ✅ Scan Docker Image for Vulnerabilities (Prevents failure)
       - name: Scan Docker Image for Vulnerabilities
         run: docker scan photoprism-app || true  # ✅ Allows pipeline to continue even if vulnerabilities exist
+
+      # ✅ Ensure storage directory exists (Fix for Error 2)
+      - name: Prepare storage directory for tests
+        run: |
+          mkdir -p storage
+          cd storage
+          wget -c https://dl.photoprism.app/qa/acceptance.tar.gz -O - | tar -xz
 
       # ✅ Start PhotoPrism in Docker
       - name: Start PhotoPrism
