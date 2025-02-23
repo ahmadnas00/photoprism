@@ -52,9 +52,16 @@ jobs:
       - name: Scan Docker Image for Vulnerabilities
         run: docker scan photoprism-app || true  # ✅ Allows pipeline to continue even if vulnerabilities exist
 
-#      # ✅ Run Specific Photo Tests (ONLY 3 tests)
-#      - name: Run Only Specific Photo Tests
-#        run: node --require ts-node/register node_modules/.bin/mocha frontend/tests/unit/model/photo_test.js --grep "should get photo (entity name|uuid|title)"
+      # ✅ Start PhotoPrism in Docker
+      - name: Start PhotoPrism
+        run: |
+          docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
+          sleep 15  # Wait for it to start
+
+      # ✅ Run Specific Photo Tests (ONLY 2 tests)
+      - name: Run only authentication and sharing tests
+        run: |
+          make acceptance-run-chromium TESTS='--test-meta "testID=authentication-001" --test-meta "testID=sharing-001"'
 
       # ✅ Push Docker Image to DockerHub (ONLY if all tests pass)
       - name: Push Docker Image to DockerHub
@@ -62,4 +69,3 @@ jobs:
         run: |
           docker tag photoprism-app ${{ secrets.DOCKERHUB_USERNAME }}/photoprism-app:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/photoprism-app:latest
-
