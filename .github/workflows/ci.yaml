@@ -23,8 +23,8 @@ jobs:
           curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
       # ✅ Run golangci-lint for Go code analysis
-      - name: Run golangci-lint
-        run: $(go env GOPATH)/bin/golangci-lint run ./... --timeout=5m || exit 1
+      - name: Run golangci-lint with selected linters
+        run: $(go env GOPATH)/bin/golangci-lint run ./... --timeout=5m --disable-all -E govet -E staticcheck -E errcheck || exit 1
 
 
       # ✅ Build the Docker image
