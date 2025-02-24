@@ -24,7 +24,8 @@ jobs:
 
       # ✅ Run golangci-lint for Go code analysis
       - name: Run golangci-lint
-        run: $(go env GOPATH)/bin/golangci-lint run ./... || exit 1  # Fail if linting errors exist
+        run: $(go env GOPATH)/bin/golangci-lint run ./... --timeout=5m || exit 1
+
 
       # ✅ Build the Docker image
       - name: Build Docker Image
