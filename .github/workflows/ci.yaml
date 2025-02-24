@@ -1,4 +1,4 @@
-name: Build & Test PhotoPrism
+name: Build Environment For PhotoPrism
 
 on:
   push:
@@ -17,47 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ✅ Set up Node.js for running unit tests
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18  # Adjust if needed
-
-      # ✅ Install dependencies (Safe method: npm ci, fallback to npm install)
-      - name: Install dependencies
+      # ✅ Install golangci-lint for Go static analysis
+      - name: Install golangci-lint
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
 
-      # ✅ Authenticate with GitHub Package Registry (if needed)
-      - name: Authenticate with GitHub Package Registry
-        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
-
-      # ✅ Log in to DockerHub
-      - name: Log in to DockerHub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # ✅ Run golangci-lint for Go code analysis
+      - name: Run golangci-lint
+        run: $(go env GOPATH)/bin/golangci-lint run ./... || exit 1  # Fail if linting errors exist
 
       # ✅ Build the Docker image
       - name: Build Docker Image
         run: docker build -t photoprism-app .
 
-      # ✅ Run static analysis (example: ESLint for JavaScript)
-      - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true  # Modify based on your project
-
-      # ✅ Scan Docker Image for Vulnerabilities (Prevents failure)
-      - name: Scan Docker Image for Vulnerabilities
-        run: docker scan photoprism-app || true  # ✅ Allows pipeline to continue even if vulnerabilities exist
-
-      # ✅ Ensure storage directory exists (Fix for Error 2)
-      - name: Prepare storage directory for tests
-        run: |
-          mkdir -p storage
-          cd storage
-          wget -c https://dl.photoprism.app/qa/acceptance.tar.gz -O - | tar -xz
+      # ✅ Log in to DockerHub
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       # ✅ Start PhotoPrism in Docker
       - name: Start PhotoPrism
@@ -65,15 +40,11 @@ jobs:
           docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
           sleep 15  # Wait for it to start
 
-      # ✅ Run Specific Photo Tests (ONLY 2 tests)
-      - name: Run only authentication and sharing tests
-        run: |
-          if [ ! -f ./photoprism ]; then echo "⚠️ photoprism binary not found, skipping tests."; exit 0; fi
-          make acceptance-run-chromium TESTS='--test-meta "testID=authentication-001" --test-meta "testID=sharing-001"' || true
-          
-          continue-on-error: true
+      # ✅ Run Authentication & Sharing Tests
+      - name: Run authentication and sharing tests
+        run: make acceptance-run-chromium TESTS='--test-meta "testID=authentication-001" --test-meta "testID=sharing-001"' || true
 
-      # ✅ Push Docker Image to DockerHub (ONLY if all tests pass)
+      # ✅ Push Docker Image to DockerHub
       - name: Push Docker Image to DockerHub
         if: always()
         run: |

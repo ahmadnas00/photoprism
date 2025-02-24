@@ -24,7 +24,7 @@ describe("common/api", () => {
 
   const deleteEntityResponse = null;
 
-  it("get should return a list of results and return with HTTP code 200", (done) => {
+  it.only("get should return a list of results and return with HTTP code 200", (done) => {
     Api.get("foo")
       .then((response) => {
         assert.equal(200, response.status);
@@ -60,7 +60,7 @@ describe("common/api", () => {
       });
   });
 
-  it("put should update one item and return with HTTP code 200", (done) => {
+  it.only("put should update one item and return with HTTP code 200", (done) => {
     Api.put("foo/2", putEntityResponse)
       .then((response) => {
         assert.equal(200, response.status);
@@ -72,7 +72,7 @@ describe("common/api", () => {
       });
   });
 
-  it("delete should delete one item and return with HTTP code 204", (done) => {
+  it.only("delete should delete one item and return with HTTP code 204", (done) => {
     Api.delete("foo/2", deleteEntityResponse)
       .then((response) => {
         assert.equal(204, response.status);

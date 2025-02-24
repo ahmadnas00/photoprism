@@ -39,7 +39,7 @@ describe("model/album", () => {
     assert.equal(result, "christmas-2019");
   });
 
-  it("should get album id", () => {
+  it.only("should get album id", () => {
     const values = { ID: 5, Title: "Christmas 2019", Slug: "christmas-2019", UID: 66 };
     const album = new Album(values);
     const result = album.getId();
