@@ -1,4 +1,4 @@
-name: Build Environment - PhotoPrism
+name: Build Environment - Unit Tests & CheckStyle
 
 on:
   push:
@@ -9,62 +9,68 @@ on:
       - feature/my_feature
 
 jobs:
-  build-test-push:
+  lint:
+    name: Run Go Lint Check
     runs-on: ubuntu-latest
 
     steps:
-      # ✅ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ✅ Set up Node.js for JavaScript/TypeScript tests
-      - name: Set up Node.js
+      - name: Install libvips (Required for govips)
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.64.5
+          args: --timeout=5m --max-issues-per-linter=0 --max-same-issues=0 || true
+
+  build-test-push:
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js for JavaScript/TypeScript tests
         uses: actions/setup-node@v3
         with:
-          node-version: 18  # Adjust if needed
+          node-version: 18
 
-      # ✅ Install JavaScript dependencies (Fixes "karma: not found" error)
       - name: Install JavaScript Dependencies
         run: cd frontend && npm install
 
-      # ✅ Install Karma CLI globally (Ensures `karma` is available)
       - name: Install Karma CLI
         run: npm install -g karma-cli
 
-      # ✅ Log in to DockerHub
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # ✅ Build the Docker image (BEFORE running tests)
       - name: Build Docker Image
         run: docker build -t photoprism-app .
 
-      # ✅ Run JavaScript Unit Tests using Makefile (AFTER building the image)
       - name: Run JavaScript Unit Tests
         run: make test-js
 
-      # ✅ Run ESLint (Static Code Analysis for JavaScript)
       - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true  # Modify based on your project
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
 
-      # ✅ Scan Docker Image for Vulnerabilities
       - name: Scan Docker Image for Vulnerabilities
-        run: docker scan photoprism-app || true  # ✅ Allows pipeline to continue even if vulnerabilities exist
+        run: docker scan photoprism-app || true
 
-      # ✅ Ensure storage directory exists (Fix for Error 2)
       - name: Prepare storage directory for tests
         run: |
           mkdir -p storage
           cd storage
           wget -c https://dl.photoprism.app/qa/acceptance.tar.gz -O - | tar -xz
 
-      # ✅ Start PhotoPrism in Docker
       - name: Start PhotoPrism
         run: |
           docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
-          sleep 15  # Wait for it to start
+          sleep 15
 
-      # ✅ Push Docker Image to DockerHub
       - name: Push Docker Image to DockerHub
         if: always()
         run: |
