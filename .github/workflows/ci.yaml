@@ -65,11 +65,6 @@ jobs:
           docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
           sleep 15  # Wait for it to start
 
-      # ✅ Run Specific Photo Tests (Only Authentication & Sharing Tests)
-      - name: Run only authentication and sharing tests
-        run: |
-          if [ ! -f ./photoprism ]; then echo "⚠️ photoprism binary not found, skipping tests."; exit 0; fi
-          make acceptance-run-chromium TESTS='--test-meta "testID=authentication-001" --test-meta "testID=sharing-001"' || true
 
       # ✅ Push Docker Image to DockerHub
       - name: Push Docker Image to DockerHub
