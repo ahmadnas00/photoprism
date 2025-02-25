@@ -23,14 +23,13 @@ jobs:
         with:
           node-version: 18  # Adjust if needed
 
-      # ✅ Install dependencies (Safe method: npm ci, fallback to npm install)
-      - name: Install dependencies
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install
-          fi
+      # ✅ Install JavaScript dependencies (Fixes "karma: not found" error)
+      - name: Install JavaScript Dependencies
+        run: cd frontend && npm install
+
+      # ✅ Install Karma CLI globally (Ensures `karma` is available)
+      - name: Install Karma CLI
+        run: npm install -g karma-cli
 
       # ✅ Log in to DockerHub
       - name: Log in to DockerHub
@@ -64,7 +63,6 @@ jobs:
         run: |
           docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
           sleep 15  # Wait for it to start
-
 
       # ✅ Push Docker Image to DockerHub
       - name: Push Docker Image to DockerHub
