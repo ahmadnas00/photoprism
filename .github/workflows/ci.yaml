@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ✅ Set up Node.js for running unit tests
+      # ✅ Set up Node.js for JavaScript/TypeScript tests
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -32,6 +32,10 @@ jobs:
             npm install
           fi
 
+      # ✅ Run JavaScript Unit Tests using Makefile
+      - name: Run JavaScript Unit Tests
+        run: make test-js
+
       # ✅ Authenticate with GitHub Package Registry (if needed)
       - name: Authenticate with GitHub Package Registry
         run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
@@ -44,11 +48,11 @@ jobs:
       - name: Build Docker Image
         run: docker build -t photoprism-app .
 
-      # ✅ Run static analysis (example: ESLint for JavaScript)
+      # ✅ Run ESLint (Static Code Analysis for JavaScript)
       - name: Run ESLint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx || true  # Modify based on your project
 
-      # ✅ Scan Docker Image for Vulnerabilities (Prevents failure)
+      # ✅ Scan Docker Image for Vulnerabilities
       - name: Scan Docker Image for Vulnerabilities
         run: docker scan photoprism-app || true  # ✅ Allows pipeline to continue even if vulnerabilities exist
 
@@ -65,13 +69,7 @@ jobs:
           docker run -d --name photoprism -p 2342:2342 -e PHOTOPRISM_ADMIN_PASSWORD="photoprism" photoprism/photoprism:latest
           sleep 15  # Wait for it to start
 
-      # ✅ Run Specific Photo Tests (ONLY 2 tests)
-      - name: Run only authentication and sharing tests
-        run: |
-          if [ ! -f ./photoprism ]; then echo "⚠️ photoprism binary not found, skipping tests."; exit 0; fi
-          make acceptance-run-chromium TESTS='--test-meta "testID=authentication-001" --test-meta "testID=sharing-001"' || true
-          
-          continue-on-error: true
+   
 
       # ✅ Push Docker Image to DockerHub
       - name: Push Docker Image to DockerHub
