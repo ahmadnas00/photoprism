@@ -3,7 +3,6 @@
 /photoprism-*
 /photos/originals/*
 /photos/import/*
-/storage/*
 /build/*
 /assets/docs
 /assets/facenet

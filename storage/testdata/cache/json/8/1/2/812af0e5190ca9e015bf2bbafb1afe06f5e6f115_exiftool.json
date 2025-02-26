@@ -1,0 +1,23 @@
+[{
+  "SourceFile": "/go/src/github.com/photoprism/photoprism/storage/testdata/import/tweethog.png",
+  "ExifToolVersion": 12.76,
+  "FileName": "tweethog.png",
+  "Directory": "/go/src/github.com/photoprism/photoprism/storage/testdata/import",
+  "FileSize": 84641,
+  "FileModifyDate": "2025:02:23 09:46:49+00:00",
+  "FileAccessDate": "2025:02:23 09:46:49+00:00",
+  "FileInodeChangeDate": "2025:02:23 09:46:49+00:00",
+  "FilePermissions": 100777,
+  "FileType": "PNG",
+  "FileTypeExtension": "PNG",
+  "MIMEType": "image/png",
+  "ImageWidth": 1395,
+  "ImageHeight": 960,
+  "BitDepth": 8,
+  "ColorType": 6,
+  "Compression": 0,
+  "Filter": 0,
+  "Interlace": 0,
+  "ImageSize": "1395 960",
+  "Megapixels": 1.3392
+}]
