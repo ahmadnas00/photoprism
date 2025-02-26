@@ -39,6 +39,7 @@ venv
 .venv
 __pycache__
 
+
 # Custom config, database, log, and temporary files
 /tmp/
 *.log
