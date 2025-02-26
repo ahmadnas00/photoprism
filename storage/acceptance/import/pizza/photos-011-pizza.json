@@ -1,0 +1,31 @@
+{
+  "title": "IMG_9046.JPG",
+  "description": "",
+  "imageViews": "0",
+  "creationTime": {
+    "timestamp": "1565256001",
+    "formatted": "08.08.2019, 09:20:01 UTC"
+  },
+  "modificationTime": {
+    "timestamp": "1585912940",
+    "formatted": "03.04.2020, 11:22:20 UTC"
+  },
+  "geoData": {
+    "latitude": -26.087780555555554,
+    "longitude": 27.77221388888889,
+    "altitude": 1722.5004887585533,
+    "latitudeSpan": 0.0,
+    "longitudeSpan": 0.0
+  },
+  "geoDataExif": {
+    "latitude": -26.087780555555554,
+    "longitude": 27.77221388888889,
+    "altitude": 1722.5004887585533,
+    "latitudeSpan": 0.0,
+    "longitudeSpan": 0.0
+  },
+  "photoTakenTime": {
+    "timestamp": "1487606507",
+    "formatted": "20.02.2017, 16:01:47 UTC"
+  }
+}

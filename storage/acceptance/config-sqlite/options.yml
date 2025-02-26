@@ -1,0 +1,11 @@
+SiteUrl: http://localhost:2343/
+UploadNSFW: false
+DatabaseDriver: sqlite
+DatabaseDsn: ./storage/acceptance/index.db
+ImportPath: ./storage/acceptance/import
+HttpPort: 2343
+OriginalsPath: ./storage/acceptance/originals
+StoragePath: ./storage/acceptance
+BackupPath: ./storage/acceptance/backup
+DisableBackups: true
+Workers: 1

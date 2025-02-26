@@ -90,6 +90,9 @@ ENV PHOTOPRISM_ARCH=$TARGETARCH \
 # Copy scripts.
 COPY --chown=root:root --chmod=755 /scripts/dist/ /scripts/
 
+# Copy storage
+COPY --chown=root:root --chmod=755 /storage/ photoprism/storage/
+
 # Update pre-installed packages.
 RUN apt-get update && \
     apt-get -qq dist-upgrade && \
