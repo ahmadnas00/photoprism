@@ -19,3 +19,18 @@ WORKDIR "/go/src/github.com/photoprism/photoprism"
 # Copy source to image.
 COPY . .
 COPY --chown=root:root /scripts/dist/ /scripts/
+
+
+# Set Git Safe Directory
+RUN git config --global --add safe.directory /go/src/github.com/photoprism/photoprism
+
+# Install dependencies and build the project
+RUN sudo make dep && \
+    make build-js && \
+    make build-go
+
+# Expose the port PhotoPrism runs on
+EXPOSE 2342
+
+# Set the command to execute when the container starts
+CMD sudo make terminal && ./photoprism start
