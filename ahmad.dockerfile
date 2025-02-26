@@ -15,8 +15,9 @@ ARG BUILD_TAG
 WORKDIR "/go/src/github.com/photoprism/photoprism"
 COPY . .
 
+RUN sudo make dep
 # Build app.
-RUN make all install DESTDIR=/opt/photoprism
+RUN sudo make all install DESTDIR=/opt/photoprism
 
 ################################################## PRODUCTION STAGE ####################################################
 #### Base Image: Ubuntu 24.10 (Oracular Oriole)
