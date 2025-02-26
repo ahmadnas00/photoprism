@@ -34,12 +34,53 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Node.js for JavaScript/TypeScript tests
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install JavaScript Dependencies
+        run: cd frontend && npm install
+
+      - name: Install Karma CLI
+        run: npm install -g karma-cli
+
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build Docker Image
         run: docker build -t ahmadnas/photoprism-app .
 
+      - name: Run JavaScript Unit Tests
+        run: make test-js
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
+
+      - name: Scan Docker Image for Vulnerabilities
+        run: docker scan ahmadnas/photoprism-app || true
+
       - name: Push Docker Image to DockerHub
-        run: docker push ahmadnas/photoprism-app
+        run: |
+          docker push ahmadnas/photoprism-app
+
+      - name: Prepare storage directory for tests
+        run: |
+          mkdir -p storage
+          cd storage
+          wget -c https://dl.photoprism.app/qa/acceptance.tar.gz -O - | tar -xz
+
+      # Install Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
+
+      - name: Start PhotoPrism with Docker Compose
+        run: |
+          sudo docker-compose up -d
+          sleep 15
+
+      - name: Run PhotoPrism Start Command
+        run: ./photoprism --public start
 
