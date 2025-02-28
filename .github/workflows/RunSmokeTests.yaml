@@ -6,8 +6,8 @@ on:
       - feature/my_feature
 
 jobs:
-  TestChrome_131_0:
-    name: Test Chrome 131.0
+  SetupEnvironment:
+    name: Setup Environment
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Java test repository
@@ -22,9 +22,23 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Pull and Run PhotoPrism Docker Container
+      - name: Pull PhotoPrism Docker Image
         run: |
           docker pull ahmadnas/photoprism-app
+
+  TestChrome_131_0:
+    name: Test Chrome 131.0
+    runs-on: ubuntu-latest
+    needs: SetupEnvironment
+    steps:
+      - name: Checkout Java test repository
+        uses: actions/checkout@v4
+        with:
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
+
+      - name: Run PhotoPrism Container
+        run: |
           docker run -d --name ahmad-photoprism \
             -v "$(pwd)/storage/originals:/photoprism/originals" \
             -p 2342:2342 ahmadnas/photoprism-app
@@ -60,6 +74,7 @@ jobs:
   TestFirefox_133_0:
     name: Test Firefox 133.0
     runs-on: ubuntu-latest
+    needs: TestChrome_131_0
     steps:
       - name: Checkout Java test repository
         uses: actions/checkout@v4
@@ -67,15 +82,8 @@ jobs:
           repository: ahmadnas00/PhotoprismProject
           path: photoprism-tests
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Pull and Run PhotoPrism Docker Container
+      - name: Run PhotoPrism Container
         run: |
-          docker pull ahmadnas/photoprism-app
           docker run -d --name ahmad-photoprism \
             -v "$(pwd)/storage/originals:/photoprism/originals" \
             -p 2342:2342 ahmadnas/photoprism-app
