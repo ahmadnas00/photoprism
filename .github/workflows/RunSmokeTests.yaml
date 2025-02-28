@@ -83,6 +83,7 @@ jobs:
           repository: ahmadnas00/PhotoprismProject
           path: photoprism-tests
 
+
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
