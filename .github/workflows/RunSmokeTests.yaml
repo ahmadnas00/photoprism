@@ -74,7 +74,7 @@ jobs:
   TestFirefox_133_0:
     name: Test Firefox 133.0
     runs-on: ubuntu-latest
-    needs: SetupEnvironment
+    needs: TestChrome_131_0
     steps:
       - name: Checkout Java test repository
         uses: actions/checkout@v4
