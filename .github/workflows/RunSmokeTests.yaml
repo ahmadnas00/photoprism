@@ -48,11 +48,11 @@ jobs:
         run: |
           docker run -d --name selenium-grid -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
-      - name: Set Ngrok Public URL
-        run: echo "BASE_URL=https://e5c3-83-229-24-161.ngrok-free.app" >> $GITHUB_ENV
+#      - name: Set Ngrok Public URL
+#        run: echo "BASE_URL=https://e5c3-83-229-24-161.ngrok-free.app" >> $GITHUB_ENV
 
-      - name: Print Ngrok URL (Debugging)
-        run: echo "Ngrok is running at $BASE_URL"
+#      - name: Print Ngrok URL (Debugging)
+#        run: echo "Ngrok is running at $BASE_URL"
 
       - name: Run Smoke Tests
         run: |
