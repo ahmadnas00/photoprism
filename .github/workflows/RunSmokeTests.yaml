@@ -80,6 +80,7 @@ jobs:
             -v "$(pwd)/storage/originals:/photoprism/originals" \
             -p 2342:2342 ahmadnas/photoprism-app
 
+
       - name: Wait for PhotoPrism to be accessible
         run: |
           for i in {1..30}; do
