@@ -22,20 +22,9 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Pull and Run PhotoPrism Docker Container
+      - name: Pull PhotoPrism Docker Image
         run: |
           docker pull ahmadnas/photoprism-app
-          docker run -d --name ahmad-photoprism \
-            -v "$(pwd)/storage/originals:/photoprism/originals" \
-            -p 2342:2342 ahmadnas/photoprism-app
-
-      - name: Wait for PhotoPrism to be accessible
-        run: |
-          for i in {1..30}; do
-            curl --silent --fail http://localhost:2342 && break
-            echo "Waiting for PhotoPrism..."
-            sleep 2
-          done
 
   TestChrome_131_0:
     name: Test Chrome 131.0
@@ -47,6 +36,20 @@ jobs:
         with:
           repository: ahmadnas00/PhotoprismProject
           path: photoprism-tests
+
+      - name: Run PhotoPrism Container
+        run: |
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
 
       - name: Launch standalone grid - Chrome
         run: |
@@ -65,6 +68,8 @@ jobs:
         run: |
           docker stop grid_container || true
           docker rm grid_container || true
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
 
   TestFirefox_133_0:
     name: Test Firefox 133.0
@@ -76,6 +81,20 @@ jobs:
         with:
           repository: ahmadnas00/PhotoprismProject
           path: photoprism-tests
+
+      - name: Run PhotoPrism Container
+        run: |
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
 
       - name: Launch standalone grid - Firefox
         run: |
@@ -94,14 +113,5 @@ jobs:
         run: |
           docker stop grid_container || true
           docker rm grid_container || true
-
-  Cleanup:
-    name: Cleanup Environment
-    runs-on: ubuntu-latest
-    needs: [TestChrome_131_0, TestFirefox_133_0]
-    if: always()
-    steps:
-      - name: Tear down PhotoPrism container
-        run: |
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
