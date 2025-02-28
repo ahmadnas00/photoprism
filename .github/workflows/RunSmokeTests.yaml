@@ -36,12 +36,17 @@ jobs:
             -v "$(pwd)/storage/originals:/photoprism/originals" \
             -p 2342:2342 ahmadnas/photoprism-app
 
-      - name: Wait for PhotoPrism to initialize
-        run: sleep 30
-
-      - name: Launch Selenium Grid - Chrome
+      - name: Wait for PhotoPrism to be accessible
         run: |
-          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
+
+      - name: Start Selenium Grid
+        run: |
+          docker run -d --name selenium-grid -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
       - name: Run Smoke Tests
         run: |
@@ -54,7 +59,7 @@ jobs:
       - name: Tear down containers
         if: always()
         run: |
-          docker stop grid_container || true
-          docker rm grid_container || true
+          docker stop selenium-grid || true
+          docker rm selenium-grid || true
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
