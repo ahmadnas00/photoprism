@@ -5,7 +5,7 @@ let chai = require("chai/chai");
 let assert = chai.assert;
 
 describe("model/photo", () => {
-  it.only("should get photo entity name", () => {
+  it("should get photo entity name", () => {
     const values = { UID: 5, Title: "Crazy Cat" };
     const photo = new Photo(values);
     const result = photo.getEntityName();
@@ -19,7 +19,7 @@ describe("model/photo", () => {
     assert.equal(result, 789);
   });
 
-  it.only("should get photo title", () => {
+  it("should get photo title", () => {
     const values = { ID: 5, Title: "Crazy Cat", UID: 789 };
     const photo = new Photo(values);
     const result = photo.getTitle();
@@ -33,7 +33,7 @@ describe("model/photo", () => {
     assert.equal(result, "https://www.google.com/maps/place/36.442881666666665,28.229493333333334");
   });
 
-  it.only("should get photo thumbnail url", () => {
+  it("should get photo thumbnail url", () => {
     const values = { ID: 5, Title: "Crazy Cat", Hash: 345982 };
     const photo = new Photo(values);
     const result = photo.thumbnailUrl("tile500");
@@ -75,7 +75,7 @@ describe("model/photo", () => {
     assert.equal(result3, "/static/img/404.jpg");
   });
 
-  it.only("should get classes", () => {
+  it("should get classes", () => {
     const values2 = {
       ID: 10,
       UID: "ABC127",
@@ -117,7 +117,7 @@ describe("model/photo", () => {
     assert.include(result2, "is-playable");
   });
 
-  it.only("should get photo download url", () => {
+  it("should get photo download url", () => {
     const values = { ID: 5, Title: "Crazy Cat", Hash: 345982 };
     const photo = new Photo(values);
     const result = photo.getDownloadUrl();

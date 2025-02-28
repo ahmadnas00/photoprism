@@ -57,8 +57,6 @@ jobs:
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
 
-
-
   TestFirefox_133_0:
     name: Test Firefox 133.0
     runs-on: ubuntu-latest
@@ -81,7 +79,6 @@ jobs:
           docker run -d --name ahmad-photoprism \
             -v "$(pwd)/storage/originals:/photoprism/originals" \
             -p 2342:2342 ahmadnas/photoprism-app
-
 
       - name: Wait for PhotoPrism to be accessible
         run: |
@@ -111,4 +108,45 @@ jobs:
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
 
+  TestAPI:
+    name: Test API Endpoints
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Java test repository
+        uses: actions/checkout@v4
+        with:
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
 
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Pull and Run PhotoPrism Docker Container
+        run: |
+          docker pull ahmadnas/photoprism-app
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
+
+      - name: Run API Tests
+        run: |
+          cd photoprism-tests
+          export BASE_URL=http://localhost:2342
+          mvn clean test -Dtest=TestAutomationProjectTesting.APITest
+
+      - name: Tear down containers
+        if: always()
+        run: |
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
