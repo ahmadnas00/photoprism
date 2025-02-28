@@ -20,11 +20,10 @@ on:
         default: 'http://localhost:4444'
 
 jobs:
-
   TestChrome_131_0:
     name: Test Chrome 131.0
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.chrome_131_0 == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.chrome_131_0 == 'true' }}
     steps:
       - name: Checkout Java test repository
         uses: actions/checkout@v4
@@ -36,7 +35,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'  # Adjust if needed
+          java-version: '17'
 
       - name: Remove existing PhotoPrism container if it exists
         run: |
@@ -53,8 +52,7 @@ jobs:
       - name: Wait for PhotoPrism to initialize
         run: sleep 30
 
-      - name: Launch standalone grid - Chrome
-        if: ${{ contains(github.event.inputs.grid_url, 'localhost') }}
+      - name: Launch Selenium Grid - Chrome
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:131.0-chromedriver-131.0-grid-4.27.0-20250101
 
@@ -62,8 +60,8 @@ jobs:
         run: |
           cd photoprism-tests
           export BROWSER=chrome
-          export GRID_URL=${{ github.event.inputs.grid_url }}
-          
+          export GRID_URL=${{ github.event.inputs.grid_url || 'http://localhost:4444' }}
+
           mvn test -Dtest=TestAutomationProjectTesting.SmokeTests
 
       - name: Tear down containers
@@ -77,7 +75,7 @@ jobs:
   TestFirefox_133_0:
     name: Test Firefox 133.0
     runs-on: ubuntu-latest
-    if: ${{ github.event.inputs.firefox_133_0 == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.firefox_133_0 == 'true' }}
     steps:
       - name: Checkout Java test repository
         uses: actions/checkout@v4
@@ -89,7 +87,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'  # Adjust if needed
+          java-version: '17'
 
       - name: Remove existing PhotoPrism container if it exists
         run: |
@@ -106,8 +104,7 @@ jobs:
       - name: Wait for PhotoPrism to initialize
         run: sleep 30
 
-      - name: Launch standalone grid - Firefox
-        if: ${{ contains(github.event.inputs.grid_url, 'localhost') }}
+      - name: Launch Selenium Grid - Firefox
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-firefox:133.0-geckodriver-0.35-grid-4.27.0-20250101
 
@@ -115,8 +112,8 @@ jobs:
         run: |
           cd photoprism-tests
           export BROWSER=firefox
-          export GRID_URL=${{ github.event.inputs.grid_url }}
-          
+          export GRID_URL=${{ github.event.inputs.grid_url || 'http://localhost:4444' }}
+
           mvn test -Dtest=TestAutomationProjectTesting.SmokeTests
 
       - name: Tear down containers
