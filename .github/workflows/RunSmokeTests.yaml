@@ -1,6 +1,9 @@
 name: Run Java Smoke Tests for PhotoPrism
 
 on:
+  push:
+    branches:
+      - feature/my_feature
   workflow_dispatch:
     inputs:
       chrome_131_0:
@@ -17,6 +20,7 @@ on:
         default: 'http://localhost:4444'
 
 jobs:
+
   TestChrome_131_0:
     name: Test Chrome 131.0
     runs-on: ubuntu-latest
