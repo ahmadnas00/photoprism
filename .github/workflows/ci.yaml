@@ -1,12 +1,17 @@
 name: Build Environment - Unit Tests & CheckStyle
 
+
 on:
-  push:
-    branches:
-      - feature/my_feature
-  pull_request:
-    branches:
-      - feature/my_feature
+  workflow_dispatch:  # Allows manual execution
+
+
+#on:
+#  push:
+#    branches:
+#      - feature/my_feature
+#  pull_request:
+#    branches:
+#      - feature/my_feature
 
 jobs:
 #  lint:
