@@ -143,7 +143,9 @@ jobs:
 
       - name: Launch standalone grid - Edge
         run: |
-          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-edge:120.0-edgedriver-120.0-grid-4.27.0-20250101
+          docker pull selenium/standalone-edge:latest
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-edge:latest
+      
 
       - name: Run Smoke Tests
         run: |
