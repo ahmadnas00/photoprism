@@ -108,6 +108,7 @@ jobs:
 #          docker stop ahmad-photoprism || true
 #          docker rm ahmad-photoprism || true
 
+
   TestAPI:
     name: Test API Endpoints
     runs-on: ubuntu-latest
