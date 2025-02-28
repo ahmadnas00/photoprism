@@ -108,3 +108,55 @@ jobs:
           docker rm grid_container || true
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
+
+
+  TestEdge_120_0:
+    name: Test Edge 120.0
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Java test repository
+        uses: actions/checkout@v4
+        with:
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Pull and Run PhotoPrism Docker Container
+        run: |
+          docker pull ahmadnas/photoprism-app
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
+
+      - name: Launch standalone grid - Edge
+        run: |
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-edge:120.0-edgedriver-120.0-grid-4.27.0-20250101
+
+      - name: Run Smoke Tests
+        run: |
+          cd photoprism-tests
+          export BROWSER=edge
+          export GRID_URL=http://localhost:4444
+          export BASE_URL=$BASE_URL
+          mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
+
+      - name: Tear down containers
+        if: always()
+        run: |
+          docker stop grid_container || true
+          docker rm grid_container || true
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
