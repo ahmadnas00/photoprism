@@ -1,0 +1,49 @@
+name: Run Java Smoke Tests for PhotoPrism
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Java test repository
+        uses: actions/checkout@v4
+        with:
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Adoptium JDK
+          java-version: '17'  # Adjust if needed
+
+      - name: Remove existing PhotoPrism container if it exists
+        run: |
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
+
+      - name: Pull and Run PhotoPrism Docker Container
+        run: |
+          docker pull ahmadnas/photoprism-app
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to initialize
+        run: sleep 30
+
+      - name: Run Smoke Tests
+        run: |
+          cd photoprism-tests
+          mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
+
+      - name: Tear down PhotoPrism container
+        if: always()  # Ensures this runs even if tests fail
+        run: |
+          docker stop ahmad-photoprism
+          docker rm ahmad-photoprism
