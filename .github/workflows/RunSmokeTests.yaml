@@ -39,7 +39,7 @@ jobs:
 
       - name: Launch standalone grid - Chrome
         run: |
-          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:131.0-chromedriver-131.0-grid-4.27.0-20250101
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
       - name: Run Smoke Tests
         run: |
@@ -90,7 +90,7 @@ jobs:
 
       - name: Launch standalone grid - Firefox
         run: |
-          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-firefox:133.0-geckodriver-0.35-grid-4.27.0-20250101
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-firefox:latest
 
       - name: Run Smoke Tests
         run: |
@@ -139,14 +139,22 @@ jobs:
             sleep 2
           done
 
+      - name: Launch standalone grid - Chrome (for API tests)
+        run: |
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
+
       - name: Run API Tests
         run: |
           cd photoprism-tests
+          export BROWSER=chrome
+          export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
-          mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
+          mvn clean test -Dtest=TestAutomationProjectTesting.APITest
 
       - name: Tear down containers
         if: always()
         run: |
+          docker stop grid_container || true
+          docker rm grid_container || true
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
