@@ -89,7 +89,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-
       - name: Remove existing PhotoPrism container if it exists
         run: |
           docker stop ahmad-photoprism || true
