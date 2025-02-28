@@ -149,7 +149,7 @@ jobs:
           export BROWSER=chrome
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
-          mvn clean test -Dtest=TestAutomationProjectTesting.APITest
+          mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
 
       - name: Tear down containers
         if: always()
