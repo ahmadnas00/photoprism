@@ -4,13 +4,27 @@ on:
   push:
     branches:
       - feature/my_feature
-  workflow_dispatch:  # Allows manual execution
+  workflow_dispatch:
+    inputs:
+      grid_url:
+        required: true
+        type: string
+        description: Grid to run tests on (local by default)
+        default: http://localhost:4444
+      chrome_131_0:
+        description: 'Chrome (131.0)'
+        required: false
+        type: boolean
+      firefox_133_0:
+        description: 'Firefox (133.0)'
+        required: false
+        type: boolean
 
 jobs:
-  RunTests:
-    name: Run Smoke Tests
+  TestChrome_131_0:
+    name: Test Chrome 131.0
     runs-on: ubuntu-latest
-
+    if: ${{ github.event.inputs.chrome_131_0 == 'true' }}
     steps:
       - name: Checkout Java test repository
         uses: actions/checkout@v4
@@ -23,11 +37,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Remove existing PhotoPrism container if it exists
-        run: |
-          docker stop ahmad-photoprism || true
-          docker rm ahmad-photoprism || true
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
@@ -44,29 +53,76 @@ jobs:
             sleep 2
           done
 
-      - name: Start Selenium Grid
+      - name: Launch standalone grid - Chrome
+        if: ${{ contains(github.event.inputs.grid_url, 'localhost') }}
         run: |
-          docker run -d --name selenium-grid -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
-
-#      - name: Set Ngrok Public URL
-#        run: echo "BASE_URL=https://e5c3-83-229-24-161.ngrok-free.app" >> $GITHUB_ENV
-
-#      - name: Print Ngrok URL (Debugging)
-#        run: echo "Ngrok is running at $BASE_URL"
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:131.0-chromedriver-131.0-grid-4.27.0-20250101
 
       - name: Run Smoke Tests
         run: |
           cd photoprism-tests
           export BROWSER=chrome
-          export GRID_URL=http://localhost:4444
+          export GRID_URL=${{ github.event.inputs.grid_url }}
           export BASE_URL=$BASE_URL
-
           mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
 
       - name: Tear down containers
         if: always()
         run: |
-          docker stop selenium-grid || true
-          docker rm selenium-grid || true
+          docker stop grid_container || true
+          docker rm grid_container || true
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
+
+  TestFirefox_133_0:
+    name: Test Firefox 133.0
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.firefox_133_0 == 'true' }}
+    steps:
+      - name: Checkout Java test repository
+        uses: actions/checkout@v4
+        with:
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Pull and Run PhotoPrism Docker Container
+        run: |
+          docker pull ahmadnas/photoprism-app
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
+
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
+
+      - name: Launch standalone grid - Firefox
+        if: ${{ contains(github.event.inputs.grid_url, 'localhost') }}
+        run: |
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-firefox:133.0-geckodriver-0.35-grid-4.27.0-20250101
+
+      - name: Run Smoke Tests
+        run: |
+          cd photoprism-tests
+          export BROWSER=firefox
+          export GRID_URL=${{ github.event.inputs.grid_url }}
+          export BASE_URL=$BASE_URL
+          mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
+
+      - name: Tear down containers
+        if: always()
+        run: |
+          docker stop grid_container || true
+          docker rm grid_container || true
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
