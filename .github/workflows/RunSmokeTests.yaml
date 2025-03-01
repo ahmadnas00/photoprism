@@ -65,6 +65,21 @@ jobs:
           export GRID_URL=http://localhost:4444
           export BASE_URL=$BASE_URL
           mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
+          
+
+      - name: Generate Allure Test Report
+        if: always()
+        run: |
+          mkdir -p photoprism-tests/allure-report
+          mvn allure:report -f photoprism-tests/pom.xml
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: photoprism-tests/target/site/allure-maven/index.html
+
 
       - name: Tear down containers
         if: always()
@@ -111,6 +126,8 @@ jobs:
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
           mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
+          
+      
 
       - name: Tear down containers
         if: always()
