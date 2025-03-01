@@ -91,74 +91,74 @@ jobs:
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
 
-#  TestAPI:
-#    name: API Tests
-#    runs-on: ubuntu-latest
-#    needs: setup
-#    steps:
-#      - name: Download test repository
-#        uses: actions/download-artifact@v4
-#        with:
-#          name: photoprism-tests
-#          path: photoprism-tests
-#
-#      - name: Pull and Run PhotoPrism Docker Container
-#        run: |
-#          docker pull ahmadnas/photoprism-app
-#          docker run -d --name ahmad-photoprism \
-#            -v "$(pwd)/storage/originals:/photoprism/originals" \
-#            -p 2342:2342 ahmadnas/photoprism-app
-#
-#      - name: Wait for PhotoPrism to be accessible
-#        run: |
-#          for i in {1..30}; do
-#            curl --silent --fail http://localhost:2342 && break
-#            echo "Waiting for PhotoPrism..."
-#            sleep 2
-#          done
-#
-#      - name: Launch standalone grid - Chrome (for API tests)
-#        run: |
-#          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
-#
-#      - name: Run API Tests
-#        run: |
-#          cd photoprism-tests
-#          export BROWSER=chrome
-#          export GRID_URL=http://localhost:4444
-#          export BASE_URL=http://localhost:2342
-#          mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
-#
-#
-#
-#      - name: Tear down containers
-#        if: always()
-#        run: |
-#          docker stop grid_container || true
-#          docker rm grid_container || true
-#          docker stop ahmad-photoprism || true
-#          docker rm ahmad-photoprism || true
-
-  PublishAllureReport:
-    name: 📊 Publish Allure Report
+  TestAPI:
+    name: API Tests
     runs-on: ubuntu-latest
-    needs: [ TestChrome_131_0]
+    needs: setup
     steps:
-      - name: Download Allure Report
+      - name: Download test repository
         uses: actions/download-artifact@v4
         with:
-          name: allure-report
-          path: allure-history/
+          name: photoprism-tests
+          path: photoprism-tests
 
-      - name: Publish Allure Report to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
+      - name: Pull and Run PhotoPrism Docker Container
+        run: |
+          docker pull ahmadnas/photoprism-app
+          docker run -d --name ahmad-photoprism \
+            -v "$(pwd)/storage/originals:/photoprism/originals" \
+            -p 2342:2342 ahmadnas/photoprism-app
 
-      - name: Add Allure Report Link to Summary
+      - name: Wait for PhotoPrism to be accessible
+        run: |
+          for i in {1..30}; do
+            curl --silent --fail http://localhost:2342 && break
+            echo "Waiting for PhotoPrism..."
+            sleep 2
+          done
+
+      - name: Launch standalone grid - Chrome (for API tests)
+        run: |
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
+
+      - name: Run API Tests
+        run: |
+          cd photoprism-tests
+          export BROWSER=chrome
+          export GRID_URL=http://localhost:4444
+          export BASE_URL=http://localhost:2342
+          mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
+
+
+
+      - name: Tear down containers
         if: always()
         run: |
-          echo "### 📊 [View Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          docker stop grid_container || true
+          docker rm grid_container || true
+          docker stop ahmad-photoprism || true
+          docker rm ahmad-photoprism || true
+#
+#  PublishAllureReport:
+#    name: 📊 Publish Allure Report
+#    runs-on: ubuntu-latest
+#    needs: [ TestChrome_131_0]
+#    steps:
+#      - name: Download Allure Report
+#        uses: actions/download-artifact@v4
+#        with:
+#          name: allure-report
+#          path: allure-history/
+#
+#      - name: Publish Allure Report to GitHub Pages
+#        uses: peaceiris/actions-gh-pages@v3
+#        if: always()
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          publish_branch: gh-pages
+#          publish_dir: allure-history
+#
+#      - name: Add Allure Report Link to Summary
+#        if: always()
+#        run: |
+#          echo "### 📊 [View Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
