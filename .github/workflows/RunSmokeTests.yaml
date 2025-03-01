@@ -136,4 +136,3 @@ jobs:
 #          docker rm grid_container || true
 #          docker stop ahmad-photoprism || true
 #          docker rm ahmad-photoprism || true
-
