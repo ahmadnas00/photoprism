@@ -139,7 +139,6 @@ jobs:
 #          docker stop ahmad-photoprism || true
 #          docker rm ahmad-photoprism || true
 
-
   PublishAllureReport:
     name: 📊 Publish Allure Report
     runs-on: ubuntu-latest
