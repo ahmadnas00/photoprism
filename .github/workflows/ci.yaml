@@ -33,7 +33,7 @@ jobs:
           version: v1.64.5
           args: --timeout=5m --max-issues-per-linter=0 --max-same-issues=0 || true
 
-  Build & Push Docker Image - Run Unit Tests:
+  Build_Push_Docker_Image_Run_Unit_Tests:
     runs-on: ubuntu-latest
     needs: lint
     steps:
