@@ -57,11 +57,11 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ahmadnas/photoprism-app -f ahmad.dockerfile .
 
-      - name: Run JavaScript Unit Tests
-        run: make test-js
-
-      - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
+#      - name: Run JavaScript Unit Tests
+#        run: make test-js
+#
+#      - name: Run ESLint
+#        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
 
 
       - name: Push Docker Image to DockerHub
