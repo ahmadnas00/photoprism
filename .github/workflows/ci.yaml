@@ -4,38 +4,32 @@ name: Build Environment - Unit Tests & CheckStyle
 on:
   push:
     branches:
-      - feature/my_feature  # Adjust to the branches you want to trigger on
-  workflow_dispatch:  # Allows manual execution
-
-#on:
-#  push:
-#    branches:
-#      - feature/my_feature
-#  pull_request:
-#    branches:
-#      - feature/my_feature
+      - feature/my_feature
+  pull_request:
+    branches:
+      - feature/my_feature
 
 jobs:
-#  lint:
-#    name: Run Go Lint Check
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: Install libvips (Required for govips)
-#        run: sudo apt-get update && sudo apt-get install -y libvips-dev
-#
-#      - name: Run golangci-lint
-#        uses: golangci/golangci-lint-action@v3
-#        with:
-#          version: v1.64.5
-#          args: --timeout=5m --max-issues-per-linter=0 --max-same-issues=0 || true
-
-  build-test-push:
+  lint:
+    name: Run Go Lint Check
     runs-on: ubuntu-latest
-#    needs: lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install libvips (Required for govips)
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.64.5
+          args: --timeout=5m --max-issues-per-linter=0 --max-same-issues=0 || true
+
+  Build & Push Docker Image - Run Unit Tests:
+    runs-on: ubuntu-latest
+    needs: lint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -57,11 +51,15 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ahmadnas/photoprism-app -f ahmad.dockerfile .
 
-#      - name: Run JavaScript Unit Tests
-#        run: make test-js
-#
-#      - name: Run ESLint
-#        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
+      - name: Run JavaScript Unit Tests
+        run: make test-js
+        continue-on-error: true
+
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
+        continue-on-error: true
+
 
 
       - name: Push Docker Image to DockerHub
