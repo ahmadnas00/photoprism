@@ -257,20 +257,39 @@ export default {
         return;
       }
       try {
+        // Fetch the image as a blob
         const imageResponse = await axios.get(this.item.DownloadUrl, { responseType: "blob" });
         const imageBlob = imageResponse.data;
-        const formData = new FormData();
-        formData.append("image", imageBlob);
-        const imgurResponse = await axios.post("https://api.imgur.com/3/image", formData, {
-          headers: { Authorization: `Client-ID ${this.imgurClientId}` },
-        });
-        const imgurUrl = imgurResponse.data.data.link;
-        console.log("Uploaded to Imgur:", imgurUrl);
-        this.qrCode = await QRCode.toDataURL(imgurUrl);
+
+        // Convert Blob to Base64 (ImgBB requires Base64-encoded images)
+        const reader = new FileReader();
+        reader.readAsDataURL(imageBlob);
+
+        reader.onloadend = async () => {
+          const base64Image = reader.result.split(",")[1]; // Extract Base64 data
+
+          // ImgBB API key
+          const apiKey = "140c6040f4e913d650aafaed02741080";
+
+          // Upload image to ImgBB
+          const imgbbResponse = await axios.post("https://api.imgbb.com/1/upload", null, {
+            params: {
+              key: apiKey,
+              image: base64Image, // Base64 encoded image
+            },
+          });
+
+          const imgbbUrl = imgbbResponse.data.data.url;
+          console.log("Uploaded to ImgBB:", imgbbUrl);
+
+          // Generate QR Code for the public URL
+          this.qrCode = await QRCode.toDataURL(imgbbUrl);
+        };
       } catch (error) {
         console.error("Error generating QR code:", error);
       }
-    },
+    }
+,
   },
 };
 </script>
