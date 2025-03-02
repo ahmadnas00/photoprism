@@ -257,38 +257,34 @@ export default {
         return;
       }
       try {
-        // Fetch the image as a blob
+        // Fetch the image as a Blob
         const imageResponse = await axios.get(this.item.DownloadUrl, { responseType: "blob" });
         const imageBlob = imageResponse.data;
 
-        // Convert Blob to Base64 (ImgBB requires Base64-encoded images)
-        const reader = new FileReader();
-        reader.readAsDataURL(imageBlob);
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append("image", imageBlob, "upload.jpg"); // Add file name
 
-        reader.onloadend = async () => {
-          const base64Image = reader.result.split(",")[1]; // Extract Base64 data
+        // ImgBB API key
+        const apiKey = "140c6040f4e913d650aafaed02741080";
 
-          // ImgBB API key
-          const apiKey = "140c6040f4e913d650aafaed02741080";
+        // Upload image to ImgBB with auto-delete after 1 hour (3600 seconds)
+        const imgbbResponse = await axios.post(
+          `https://api.imgbb.com/1/upload?key=${apiKey}&expiration=3600`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
 
-          // Upload image to ImgBB
-          const imgbbResponse = await axios.post("https://api.imgbb.com/1/upload", null, {
-            params: {
-              key: apiKey,
-              image: base64Image, // Base64 encoded image
-            },
-          });
+        const imgbbUrl = imgbbResponse.data.data.url;
+        console.log("Uploaded to ImgBB (Auto-delete in 1 hour):", imgbbUrl);
 
-          const imgbbUrl = imgbbResponse.data.data.url;
-          console.log("Uploaded to ImgBB:", imgbbUrl);
-
-          // Generate QR Code for the public URL
-          this.qrCode = await QRCode.toDataURL(imgbbUrl);
-        };
+        // Generate QR Code for the public URL
+        this.qrCode = await QRCode.toDataURL(imgbbUrl);
       } catch (error) {
         console.error("Error generating QR code:", error);
       }
     }
+
 ,
   },
 };
