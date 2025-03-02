@@ -65,23 +65,6 @@ jobs:
           export GRID_URL=http://localhost:4444
           export BASE_URL=$BASE_URL
           mvn clean test -Dtest=TestAutomationProjectTesting.SmokeTests
-          
-
-      - name: Generate Allure Report
-        if: always()
-        run: |
-          cd photoprism-tests
-          mvn allure:report
-          mkdir -p allure-history
-          cp -r photoprism-tests/target/site/allure-maven/* allure-history/
-
-      - name: Upload Allure Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-report
-          path: allure-history
-
 
       - name: Tear down containers
         if: always()

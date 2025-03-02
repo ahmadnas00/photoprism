@@ -124,7 +124,7 @@ export default {
         height: 480,
       },
       qrCode: "", // Stores the QR code image
-      imgurClientId: "2dd7e54a263d5c2", // Your actual Imgur Client ID
+      imgurClientId: "6223321ca683e6f", // Your actual Imgur Client ID
     };
   },
   created() {
