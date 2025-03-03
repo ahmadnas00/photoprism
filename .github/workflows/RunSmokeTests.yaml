@@ -167,7 +167,7 @@ jobs:
         if: always()
         with:
           name: Java Test Report
-          path: test-reports/*.xml, api-test-reports/*.xml
+          path: photoprism-tests/target/surefire-reports/TEST-*.xml  # Updated path
           reporter: java-junit
           fail-on-error: true
           list-suites: failed
@@ -175,4 +175,5 @@ jobs:
           max-annotations: 10
           fail-on-empty: true
           only-summary: false
+
 
