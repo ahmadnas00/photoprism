@@ -1,11 +1,11 @@
 name: Run Java Smoke Tests for PhotoPrism
 
 on:
-  workflow_dispatch:  # Allows manual execution
+  workflow_dispatch:  # to allow manual execution
 
   pull_request:
     branches:
-      - feature/my_feature  # Adjust to the branch you want
+      - feature/my_feature
 
 
 jobs:

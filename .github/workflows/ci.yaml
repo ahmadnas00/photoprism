@@ -1,6 +1,5 @@
 name: Build Environment - Unit Tests & CheckStyle
 
-
 on:
   push:
     branches:
@@ -14,6 +13,7 @@ on:
 #  pull_request:
 #    branches:
 #      - feature/my_feature
+
 
 jobs:
   lint:
@@ -33,9 +33,31 @@ jobs:
           version: v1.64.5
           args: --timeout=5m --max-issues-per-linter=0 --max-same-issues=0 || true
 
-  Build_Push_Docker_Image_Run_Unit_Tests:
+  eslint:
+    name: Run ESLint
     runs-on: ubuntu-latest
     needs: lint
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install JavaScript Dependencies
+        run: cd frontend && npm install
+
+      - name: Run ESLint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
+        continue-on-error: true
+
+  Build_Push_Docker_Image_Run_Unit_Tests:
+    runs-on: ubuntu-latest
+    needs: eslint
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -54,19 +76,12 @@ jobs:
       - name: Log in to DockerHub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build Docker Image
-        run: docker build -t ahmadnas/photoprism-app -f ahmad.dockerfile .
-
       - name: Run JavaScript Unit Tests
         run: make test-js
         continue-on-error: true
 
-      - name: Run ESLint
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx || true
-        continue-on-error: true
-
+      - name: Build Docker Image
+        run: docker build -t ahmadnas/photoprism-app -f ahmad.dockerfile .
 
       - name: Push Docker Image to DockerHub
-        run: |
-          docker push ahmadnas/photoprism-app
-
+        run: docker push ahmadnas/photoprism-app
