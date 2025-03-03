@@ -64,6 +64,9 @@ jobs:
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
+      - name: Ensure target/ Exists
+        run: mkdir -p target/surefire-reports
+
       - name: Run Chrome UI Tests
         run: |
           cd photoprism-tests
@@ -76,8 +79,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ui-test-results  # ✅ Unique name for UI tests
-          path: photoprism-tests/target/surefire-reports/*.xml
+          name: test-results
+          path: target/surefire-reports/*.xml
+          if-no-files-found: error
 
 
       - name: Tear down containers
@@ -118,6 +122,9 @@ jobs:
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
+      - name: Ensure target/ Exists
+        run: mkdir -p target/surefire-reports
+
       - name: Run API Tests
         run: |
           cd photoprism-tests
@@ -130,8 +137,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-results  # ✅ Unique name for API tests
-          path: photoprism-tests/target/surefire-reports/*.xml
+          name: test-results
+          path: target/surefire-reports/*.xml
+          if-no-files-found: error
 
 
       - name: Tear down containers
