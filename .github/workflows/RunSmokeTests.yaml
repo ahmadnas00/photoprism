@@ -159,6 +159,9 @@ jobs:
           name: api-test-results
           path: api-test-reports
 
+      - name: Checkout Repository
+        uses: actions/checkout@v4  # Ensures Git is available
+
       - name: Generate Test Report
         uses: dorny/test-reporter@v1
         if: always()
@@ -169,4 +172,7 @@ jobs:
           fail-on-error: true
           list-suites: failed
           list-tests: failed
-          use-actions-summary: true
+          max-annotations: 10
+          fail-on-empty: true
+          only-summary: false
+
