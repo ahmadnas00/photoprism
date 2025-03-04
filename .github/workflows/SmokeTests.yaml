@@ -29,11 +29,18 @@ jobs:
           tar --dereference --hard-dereference -czf photoprism-tests.tar.gz photoprism-tests
         shell: bash
 
-      - name: Upload project as artifact (for reuse)
+      - name: Upload project as artifact (excluding symlinks)
+        run: |
+          find photoprism-tests -type l -delete  # Remove symlinks
+          tar -czf photoprism-tests.tar.gz photoprism-tests
+        shell: bash
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: photoprism-tests
           path: photoprism-tests.tar.gz
+
 
 
   TestChrome_131_0:
