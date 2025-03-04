@@ -133,3 +133,4 @@ jobs:
           docker stop ahmad-photoprism || true
           docker rm ahmad-photoprism || true
 
+
