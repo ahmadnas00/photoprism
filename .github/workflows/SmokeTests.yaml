@@ -24,15 +24,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Archive test repository (to avoid symlink loops)
+      - name: Remove problematic symlinks
         run: |
-          tar --dereference --hard-dereference -czf photoprism-tests.tar.gz photoprism-tests
-        shell: bash
+          rm -rf photoprism-tests/pkg/fs/testdata/directory/subdirectory/symlink
+          find photoprism-tests -type l -delete  # Remove all symbolic links
 
-      - name: Upload project as artifact (excluding symlinks)
+      - name: Archive test repository (excluding symlinks)
         run: |
-          find photoprism-tests -type l -delete  # Remove symlinks
-          tar -czf photoprism-tests.tar.gz photoprism-tests
+          tar --exclude="*/symlink" -czf photoprism-tests.tar.gz photoprism-tests
         shell: bash
 
       - name: Upload artifact
@@ -40,6 +39,7 @@ jobs:
         with:
           name: photoprism-tests
           path: photoprism-tests.tar.gz
+
 
 
 
