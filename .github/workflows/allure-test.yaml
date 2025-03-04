@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ahmadnas00/PhotoprismProject
-          path: photoprism
+          path: photoprism-tests
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -23,14 +23,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Debug Check files before upload
-        run: ls -lah photoprism/
+      - name: Debug List files in photoprism-tests before upload
+        run: ls -lah photoprism-tests/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism/tests-java/
+          path: photoprism-tests/
           if-no-files-found: error
 
   TestAPI:
@@ -46,10 +46,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism/
+          path: photoprism-tests/
 
       - name: Debug Verify `tests-java` Exists
-        run: ls -lah photoprism/
+        run: ls -lah photoprism-tests/
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
@@ -72,21 +72,29 @@ jobs:
 
       - name: Run API Tests with Jacoco
         run: |
-          if [ ! -d "photoprism/tests-java" ]; then
+          if [ ! -d "photoprism-tests/tests-java" ]; then
             echo "ERROR: tests-java directory is missing!"
             exit 1
           fi
-          cd photoprism/tests-java
+          cd photoprism-tests/tests-java
           export BROWSER=chrome
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
           mvn clean verify "-Dtest=TestAutomationProjectTesting.ApiTest" "-Djacoco.destFile=target/jacoco.exec"
 
+      - name: Debug Verify Jacoco Exec File
+        run: |
+          if [ ! -f "photoprism-tests/tests-java/target/jacoco.exec" ]; then
+            echo "ERROR: Jacoco exec file is missing!"
+            exit 1
+          fi
+
       - name: Upload Jacoco exec results
         uses: actions/upload-artifact@v4
         with:
           name: api-tests-jacoco
-          path: photoprism/tests-java/target/jacoco.exec
+          path: photoprism-tests/tests-java/target/jacoco.exec
+          if-no-files-found: error
 
   GenerateJacocoReport:
     name: Generate Jacoco Test Coverage Report
@@ -98,21 +106,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ahmadnas00/PhotoprismProject
-          path: photoprism
+          path: photoprism-tests
 
       - name: Download Jacoco exec results
         uses: actions/download-artifact@v4
         with:
           name: api-tests-jacoco
-          path: photoprism/tests-java/target/
+          path: photoprism-tests/tests-java/target/
 
       - name: Generate Jacoco Report
         run: |
-          cd photoprism/tests-java
+          cd photoprism-tests/tests-java
           mvn jacoco:report -DskipTests=true
 
       - name: Upload Jacoco Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results-report
-          path: photoprism/tests-java/target/site/jacoco/
+          path: photoprism-tests/tests-java/target/site/jacoco/
