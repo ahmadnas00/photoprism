@@ -1,5 +1,11 @@
 name: Run Java Smoke Tests for PhotoPrism
 
+on:
+  workflow_dispatch:  # Allows manual execution
+  push:
+    branches:
+      - feature/my_feature
+
 jobs:
   setup:
     name: Setup Environment
