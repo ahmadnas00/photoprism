@@ -65,11 +65,12 @@ jobs:
 
       - name: Run API Tests with Jacoco
         run: |
-          cd photoprism-tests
+          cd tests-java  # Correct directory
           export BROWSER=chrome
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
-          mvn clean verify -Dtest=TestAutomationProjectTesting.ApiTest -Djacoco.destFile=target/jacoco.exec
+          mvn clean verify "-Dtest=TestAutomationProjectTesting.ApiTest" "-Djacoco.destFile=target/jacoco.exec"
+      
 
       - name: Upload Jacoco exec results
         uses: actions/upload-artifact@v4
