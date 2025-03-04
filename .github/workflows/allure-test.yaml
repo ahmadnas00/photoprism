@@ -1,30 +1,42 @@
-name: Generate Test Report
-
-
-on:
-  push:
-    branches:
-      - feature/my_feature
-
-permissions:
-  contents: write
+name: Run Java Smoke Tests for PhotoPrism
 
 jobs:
-  api-test:
-    name: Run API Tests and Generate Report
+  setup:
+    name: Setup Environment
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout test repository
+      - name: Checkout Java test repository
         uses: actions/checkout@v4
         with:
           repository: ahmadnas00/PhotoprismProject
           path: photoprism-tests
 
-      - name: Set up JDK 17
+      - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '17'
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoprism-tests
+          path: photoprism-tests.tar.gz
+
+  TestAPI:
+    name: API Tests with Jacoco
+    runs-on: ubuntu-latest
+    needs: setup
+    permissions:
+      checks: write
+      contents: read
+
+    steps:
+      - name: Download test repository
+        uses: actions/download-artifact@v4
+        with:
+          name: photoprism-tests
+          path: photoprism-tests
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
@@ -41,32 +53,49 @@ jobs:
             sleep 2
           done
 
-      - name: Run API Tests
+      - name: Launch standalone grid - Chrome (for API tests)
+        run: |
+          docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
+
+      - name: Run API Tests with Jacoco
         run: |
           cd photoprism-tests
+          export BROWSER=chrome
+          export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
-          mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest || true
+          mvn clean verify -Dtest=TestAutomationProjectTesting.ApiTest -Djacoco.destFile=target/jacoco.exec
 
-      - name: Load test report history from gh-pages
+      - name: Upload Jacoco exec results
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-tests-jacoco
+          path: photoprism-tests/target/jacoco.exec
+
+  GenerateJacocoReport:
+    name: Generate Jacoco Test Coverage Report
+    needs: TestAPI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Java test repository
         uses: actions/checkout@v4
-        if: always()
-        continue-on-error: true
         with:
-          ref: gh-pages
-          path: gh-pages
+          repository: ahmadnas00/PhotoprismProject
+          path: photoprism-tests
 
-      - name: Build test report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
+      - name: Download Jacoco exec results
+        uses: actions/download-artifact@v4
         with:
-          gh_pages: gh-pages
-          allure_history: allure-history
-          allure_results: photoprism-tests/target/allure-results
+          name: api-tests-jacoco
+          path: photoprism-tests/target/
 
-      - name: Publish test report
-        uses: peaceiris/actions-gh-pages@v3
-        if: always()
+      - name: Generate Jacoco Report
+        run: |
+          cd photoprism-tests
+          mvn jacoco:report -DskipTests=true
+
+      - name: Upload Jacoco Coverage Report
+        uses: actions/upload-artifact@v4
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
-          publish_dir: allure-history
+          name: coverage-results-report
+          path: photoprism-tests/target/site/jacoco/
