@@ -1,10 +1,10 @@
 name: Run Java Smoke Tests for PhotoPrism
 
-on:
-  workflow_dispatch:  # Allows manual execution
-  push:
-    branches:
-      - feature/my_feature
+#on:
+#  workflow_dispatch:  # Allows manual execution
+#  push:
+#    branches:
+#      - feature/my_feature
 
 
 jobs:
@@ -24,11 +24,17 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Archive test repository (to avoid symlink loops)
+        run: |
+          tar --dereference --hard-dereference -czf photoprism-tests.tar.gz photoprism-tests
+        shell: bash
+
       - name: Upload project as artifact (for reuse)
         uses: actions/upload-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism-tests
+          path: photoprism-tests.tar.gz
+
 
   TestChrome_131_0:
     name: UI Tests - Chrome 131.0
