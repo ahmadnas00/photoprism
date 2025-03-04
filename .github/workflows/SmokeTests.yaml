@@ -24,14 +24,25 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Forcefully remove problematic symlinks
+      - name: Remove all symlinks and problematic directories
         run: |
-          find photoprism-tests -type l -exec rm -f {} +
+          set -x  # Enable debugging output
+          find photoprism-tests -type l -exec rm -f {} +  # Delete all symlinks
           rm -rf photoprism-tests/pkg/fs/testdata/directory/subdirectory/symlink
+          rm -rf photoprism-tests/pkg/fs/testdata  # Remove the entire testdata directory if needed
+
+      - name: Verify no symlinks exist
+        run: |
+          if find photoprism-tests -type l | grep .; then
+            echo "Symlinks still exist! Aborting..."
+            exit 1
+          else
+            echo "All symlinks removed successfully."
+          fi
 
       - name: Archive test repository (excluding symlinks)
         run: |
-          tar --exclude="*/symlink" --exclude="*/self" -czf photoprism-tests.tar.gz photoprism-tests
+          tar --exclude="*/symlink" --exclude="*/self" --exclude="*/testdata" -czf photoprism-tests.tar.gz photoprism-tests
         shell: bash
 
       - name: Upload artifact
