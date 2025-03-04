@@ -1,18 +1,11 @@
 name: Build Environment - Unit Tests & CheckStyle
 
-on:
-  push:
-    branches:
-      - feature/my_feature  # Adjust to the branches you want to trigger on
-  workflow_dispatch:  # Allows manual execution
-
 #on:
 #  push:
 #    branches:
-#      - feature/my_feature
-#  pull_request:
-#    branches:
-#      - feature/my_feature
+#      - feature/my_feature  # Adjust to the branches you want to trigger on
+#  workflow_dispatch:  # Allows manual execution
+
 
 
 jobs:
