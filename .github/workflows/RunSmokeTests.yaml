@@ -80,6 +80,10 @@ jobs:
     name: API Tests
     runs-on: ubuntu-latest
     needs: setup
+    permissions:
+      checks: write
+      contents: read
+
     steps:
       - name: Download test repository
         uses: actions/download-artifact@v4
@@ -106,6 +110,9 @@ jobs:
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
 
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
       - name: Run API Tests
         run: |
           cd photoprism-tests
@@ -113,6 +120,10 @@ jobs:
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
           mvn clean test -Dtest=TestAutomationProjectTesting.ApiTest
+
+      - name: Publish Test Report
+        if: success() || failure()
+        uses: scacap/action-surefire-report@v1
 
       - name: Tear down containers
         if: always()
