@@ -23,7 +23,7 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Debug: Check files before upload
+      - name: Debug Check files before upload
         run: ls -lah photoprism/
 
       - name: Upload artifact
@@ -48,7 +48,7 @@ jobs:
           name: photoprism-tests
           path: photoprism/
 
-      - name: Debug: Verify `tests-java` Exists
+      - name: Debug Verify `tests-java` Exists
         run: ls -lah photoprism/
 
       - name: Pull and Run PhotoPrism Docker Container
