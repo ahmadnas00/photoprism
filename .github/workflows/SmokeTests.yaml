@@ -109,7 +109,7 @@ jobs:
       - name: Launch standalone grid - Chrome (for API tests)
         run: |
           docker run --name grid_container -d -p 4444:4444 --shm-size=2gb selenium/standalone-chrome:latest
-#
+
 #      - name: Checkout Code
 #        uses: actions/checkout@v4
 
