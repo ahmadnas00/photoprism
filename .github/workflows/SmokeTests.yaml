@@ -29,9 +29,9 @@ jobs:
           rm -rf photoprism-tests/pkg/fs/testdata/directory/subdirectory/symlink
           find photoprism-tests -type l -delete  # Remove all symbolic links
 
-      - name: Archive test repository (excluding symlinks)
+      - name: Archive test repository (excluding symlink loops)
         run: |
-          tar --exclude="*/symlink" -czf photoprism-tests.tar.gz photoprism-tests
+          tar --exclude="*/symlink" --exclude="*/self" --exclude="*/loop" -czf photoprism-tests.tar.gz photoprism-tests
         shell: bash
 
       - name: Upload artifact
@@ -39,6 +39,7 @@ jobs:
         with:
           name: photoprism-tests
           path: photoprism-tests.tar.gz
+
 
 
 
