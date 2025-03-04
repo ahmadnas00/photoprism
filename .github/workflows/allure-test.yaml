@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ahmadnas00/PhotoprismProject
-          path: photoprism-tests
+          path: photoprism
 
       - name: Set up Java
         uses: actions/setup-java@v3
@@ -27,7 +27,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism-tests
+          path: photoprism
 
   TestAPI:
     name: API Tests with Jacoco
@@ -42,7 +42,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism-tests
+          path: photoprism
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
@@ -65,18 +65,17 @@ jobs:
 
       - name: Run API Tests with Jacoco
         run: |
-          cd tests-java  # Correct directory
+          cd photoprism/tests-java || exit 1  # Ensure the directory exists
           export BROWSER=chrome
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
           mvn clean verify "-Dtest=TestAutomationProjectTesting.ApiTest" "-Djacoco.destFile=target/jacoco.exec"
-      
 
       - name: Upload Jacoco exec results
         uses: actions/upload-artifact@v4
         with:
           name: api-tests-jacoco
-          path: photoprism-tests/target/jacoco.exec
+          path: photoprism/tests-java/target/jacoco.exec
 
   GenerateJacocoReport:
     name: Generate Jacoco Test Coverage Report
@@ -88,21 +87,21 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ahmadnas00/PhotoprismProject
-          path: photoprism-tests
+          path: photoprism
 
       - name: Download Jacoco exec results
         uses: actions/download-artifact@v4
         with:
           name: api-tests-jacoco
-          path: photoprism-tests/target/
+          path: photoprism/tests-java/target/
 
       - name: Generate Jacoco Report
         run: |
-          cd photoprism-tests
+          cd photoprism/tests-java
           mvn jacoco:report -DskipTests=true
 
       - name: Upload Jacoco Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: coverage-results-report
-          path: photoprism-tests/target/site/jacoco/
+          path: photoprism/tests-java/target/site/jacoco/
