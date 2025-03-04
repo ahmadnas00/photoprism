@@ -23,11 +23,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Debug: Check files before upload
+        run: ls -lah photoprism/
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism
+          path: photoprism/tests-java/
+          if-no-files-found: error
 
   TestAPI:
     name: API Tests with Jacoco
@@ -42,7 +46,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: photoprism-tests
-          path: photoprism
+          path: photoprism/
+
+      - name: Debug: Verify `tests-java` Exists
+        run: ls -lah photoprism/
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
@@ -65,7 +72,11 @@ jobs:
 
       - name: Run API Tests with Jacoco
         run: |
-          cd photoprism/tests-java || exit 1  # Ensure the directory exists
+          if [ ! -d "photoprism/tests-java" ]; then
+            echo "ERROR: tests-java directory is missing!"
+            exit 1
+          fi
+          cd photoprism/tests-java
           export BROWSER=chrome
           export GRID_URL=http://localhost:4444
           export BASE_URL=http://localhost:2342
