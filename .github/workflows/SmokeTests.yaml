@@ -24,14 +24,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Remove problematic symlinks
+      - name: Forcefully remove problematic symlinks
         run: |
+          find photoprism-tests -type l -exec rm -f {} +
           rm -rf photoprism-tests/pkg/fs/testdata/directory/subdirectory/symlink
-          find photoprism-tests -type l -delete  # Remove all symbolic links
 
-      - name: Archive test repository (excluding symlink loops)
+      - name: Archive test repository (excluding symlinks)
         run: |
-          tar --exclude="*/symlink" --exclude="*/self" --exclude="*/loop" -czf photoprism-tests.tar.gz photoprism-tests
+          tar --exclude="*/symlink" --exclude="*/self" -czf photoprism-tests.tar.gz photoprism-tests
         shell: bash
 
       - name: Upload artifact
@@ -39,9 +39,6 @@ jobs:
         with:
           name: photoprism-tests
           path: photoprism-tests.tar.gz
-
-
-
 
 
   TestChrome_131_0:
