@@ -3,9 +3,8 @@ name: Build Environment-Unit Tests & CheckStyle
 on:
   push:
     branches:
-      - feature/my_feature  # Adjust to the branches you want to trigger on
-  workflow_dispatch:  # Allows manual execution
-
+      - feature/my_feature
+  workflow_dispatch:
 
 
 jobs:
