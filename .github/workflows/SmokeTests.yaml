@@ -31,7 +31,6 @@ jobs:
           name: photoprism-tests
           path: photoprism-tests
 
-
   TestChrome_131_0:
     name: UI Tests - Chrome 131.0
     runs-on: ubuntu-latest
