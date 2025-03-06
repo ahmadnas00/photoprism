@@ -5,9 +5,7 @@ on:
   push:
     branches:
       - feature/my_feature
-  pull_request:
-    branches:
-      - feature/my_feature
+
 
 
 jobs:
@@ -27,6 +25,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: photoprism-tests
+          path: photoprism-tests
 
 
   TestChrome_131_0:
@@ -34,7 +37,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
-
+      - name: Download test repository
+        uses: actions/download-artifact@v4
+        with:
+          name: photoprism-tests
+          path: photoprism-tests
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
