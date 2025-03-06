@@ -34,11 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: setup
     steps:
-      - name: Download test repository
-        uses: actions/download-artifact@v4
-        with:
-          name: photoprism-tests
-          path: photoprism-tests
+
 
       - name: Pull and Run PhotoPrism Docker Container
         run: |
