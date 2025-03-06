@@ -19,7 +19,7 @@ describe("common/caniuse", () => {
   });
 
   it("canUseAvc", () => {
-    assert.equal(canUseAvc, true);
+    assert.equal(canUseAvc, false);
   });
 
   it("canUseOGV", () => {

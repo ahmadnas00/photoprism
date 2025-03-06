@@ -1,0 +1,1 @@
+Facenet 20250220 0492eb1d67789108b7eefb274e26633504b059be  /tmp/photoprism/facenet.zip

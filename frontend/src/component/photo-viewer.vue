@@ -16,27 +16,34 @@
 
           <div class="pswp__counter"></div>
 
-          <button class="pswp__button pswp__button--close action-close" :title="$gettext('Close')"></button>
-
           <button v-if="canDownload" class="pswp__button action-download" style="background: none" :title="$gettext('Download')" @click.exact="onDownload">
-            <v-icon size="16" color="white">get_app</v-icon>
-          </button>
+          <v-icon size="16" color="white">get_app</v-icon>
+            </button>
 
           <button v-if="canEdit" class="pswp__button action-edit hidden-shared-only" style="background: none" :title="$gettext('Edit')" @click.exact="onEdit">
-            <v-icon size="16" color="white">edit</v-icon>
+          <v-icon size="16" color="white">edit</v-icon>
           </button>
 
           <button class="pswp__button action-select" style="background: none" :title="$gettext('Select')" @click.exact="onSelect">
-            <v-icon v-if="selection.length && $clipboard.has(item)" size="16" color="white">check_circle</v-icon>
+             <v-icon v-if="selection.length && $clipboard.has(item)" size="16" color="white">check_circle</v-icon>
             <v-icon v-else size="16" color="white">radio_button_off</v-icon>
-          </button>
+            </button>
 
-          <button v-if="canLike" class="pswp__button action-like hidden-shared-only" style="background: none" :title="$gettext('Like')" @click.exact="onLike">
-            <v-icon v-if="item.Favorite" size="16" color="white">favorite</v-icon>
+              <button v-if="canLike" class="pswp__button action-like hidden-shared-only" style="background: none" :title="$gettext('Like')" @click.exact="onLike">
+                <v-icon v-if="item.Favorite" size="16" color="white">favorite</v-icon>
             <v-icon v-else size="16" color="white">favorite_border</v-icon>
-          </button>
+              </button>
 
-          <button class="pswp__button pswp__button--fs action-toggle-fullscreen" :title="$gettext('Fullscreen')"></button>
+                <button class="pswp__button pswp__button--fs action-toggle-fullscreen" :title="$gettext('Fullscreen')"></button>
+
+             <button v-if="canDownload" class="pswp__button action-qr" style="background: none" :title="$gettext('Generate QR Code')" @click.exact="generateQrForImage">
+              <v-icon size="16" color="white">qr_code</v-icon>
+             </button>
+
+             <div v-if="qrCode" class="qr-container">
+             <img :src="qrCode" alt="QR Code" />
+              <button @click="qrCode = null" class="close-btn">X</button>
+              </div>
 
           <button class="pswp__button pswp__button--zoom action-zoom" :title="$gettext('Zoom in/out')"></button>
 
@@ -58,11 +65,8 @@
           <div class="pswp__share-tooltip"></div>
         </div>
 
-        <button class="pswp__button pswp__button--arrow--left action-previous" title="Previous (arrow left)">
-</button>
-
-        <button class="pswp__button pswp__button--arrow--right action-next" title="Next (arrow right)">
-</button>
+        <button class="pswp__button pswp__button--arrow--left action-previous" title="Previous (arrow left)"></button>
+        <button class="pswp__button pswp__button--arrow--right action-next" title="Next (arrow right)"></button>
 
         <div class="pswp__caption" @click="onPlay">
           <div class="pswp__caption__center"></div>
@@ -70,11 +74,15 @@
       </div>
     </div>
     <div v-if="player.show" class="video-viewer" @click.stop.prevent="closePlayer" @keydown.esc.stop.prevent="closePlayer">
-      <p-video-player ref="player" :source="player.source" :poster="player.poster" :height="player.height" :width="player.width" :autoplay="player.autoplay" :loop="player.loop" @close="closePlayer">
-</p-video-player>
+      <p-video-player ref="player" :source="player.source" :poster="player.poster" :height="player.height" :width="player.width" :autoplay="player.autoplay" :loop="player.loop" @close="closePlayer"></p-video-player>
+    </div>
+    <div v-if="qrCode" class="qr-container">
+      <img :src="qrCode" alt="QR Code" />
     </div>
   </div>
 </template>
+
+
 
 <script>
 import "photoswipe/dist/photoswipe.css";
@@ -84,6 +92,11 @@ import Thumb from "model/thumb";
 import { Photo, DATE_FULL } from "model/photo";
 import Notify from "common/notify";
 import { DateTime } from "luxon";
+import axios from "axios";
+import QRCode from "qrcode";
+
+
+
 
 export default {
   name: "PPhotoViewer",
@@ -110,6 +123,8 @@ export default {
         width: 640,
         height: 480,
       },
+      qrCode: "", // Stores the QR code image
+      imgurClientId: "6223321ca683e6f", // Your actual Imgur Client ID
     };
   },
   created() {
@@ -130,13 +145,10 @@ export default {
       if (!s || !s.length) {
         return s;
       }
-
       const l = s.length;
-
       if (l !== 20 || s[l - 1] !== "Z") {
         return s;
       }
-
       return DateTime.fromISO(s, { zone: "UTC" }).toLocaleString(DATE_FULL);
     },
     onShow() {
@@ -149,15 +161,12 @@ export default {
     },
     onChange(ev, data) {
       const psp = this.$viewer.gallery;
-
       if (psp && this.slideshow.next !== psp.getCurrentIndex()) {
         this.onPause();
       }
-
       if (data.item && this.item && this.item.UID !== data.item.UID) {
         this.closePlayer();
       }
-
       this.item = data.item;
     },
     onLike() {
@@ -176,34 +185,26 @@ export default {
         this.$notify.error(this.$gettext("No video selected"));
         return;
       }
-
       const params = video.videoParams();
-
       if (params.error) {
         this.$notify.error(params.error);
         return;
       }
-
-      // Set video parameters.
       this.player.loop = params.loop;
       this.player.width = params.width;
       this.player.height = params.height;
       this.player.poster = params.poster;
       this.player.source = params.uri;
-
-      // Play video.
       this.player.show = true;
     },
     closePlayer() {
       if (this.$refs.player) {
         this.$refs.player.stop();
       }
-
       this.player.show = false;
     },
     onPause() {
       this.slideshow.active = false;
-
       if (this.interval) {
         clearInterval(this.interval);
         this.interval = false;
@@ -214,12 +215,9 @@ export default {
         this.onPause();
         return;
       }
-
       this.slideshow.active = true;
-
       const self = this;
       const psp = this.$viewer.gallery;
-
       self.interval = setInterval(() => {
         if (psp && typeof psp.next === "function") {
           psp.next();
@@ -231,41 +229,63 @@ export default {
     },
     onDownload() {
       this.onPause();
-
       if (!this.item || !this.item.DownloadUrl) {
         console.warn("photo viewer: no download url");
         return;
       }
-
       Notify.success(this.$gettext("Downloading…"));
-
       new Photo().find(this.item.UID).then((p) => p.downloadAll());
     },
     onEdit() {
       this.onPause();
-
-      const g = this.$viewer.gallery; // Gallery
+      const g = this.$viewer.gallery;
       let index = 0;
-
-      // remove duplicates
-      let filtered = g.items.filter(function (p, i, s) {
-        return !(i > 0 && p.UID === s[i - 1].UID);
-      });
-
+      let filtered = g.items.filter((p, i, s) => !(i > 0 && p.UID === s[i - 1].UID));
       let selection = filtered.map((p, i) => {
         if (g.currItem.UID === p.UID) {
           index = i;
         }
-
         return p.UID;
       });
-
       let album = null;
-
-      g.close(); // Close Gallery
-
-      Event.publish("dialog.edit", { selection, album, index }); // Open Edit Dialog
+      g.close();
+      Event.publish("dialog.edit", { selection, album, index });
     },
+    async generateQrForImage() {
+      if (!this.item || !this.item.DownloadUrl) {
+        console.warn("No image available for QR generation");
+        return;
+      }
+      try {
+        // Fetch the image as a Blob
+        const imageResponse = await axios.get(this.item.DownloadUrl, { responseType: "blob" });
+        const imageBlob = imageResponse.data;
+
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append("image", imageBlob, "upload.jpg"); // Add file name
+
+        // ImgBB API key
+        const apiKey = "140c6040f4e913d650aafaed02741080";
+
+        // Upload image to ImgBB with auto-delete after 1 hour (3600 seconds)
+        const imgbbResponse = await axios.post(
+          `https://api.imgbb.com/1/upload?key=${apiKey}&expiration=3600`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        const imgbbUrl = imgbbResponse.data.data.url;
+        console.log("Uploaded to ImgBB (Auto-delete in 1 hour):", imgbbUrl);
+
+        // Generate QR Code for the public URL
+        this.qrCode = await QRCode.toDataURL(imgbbUrl);
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+      }
+    }
+
+,
   },
 };
 </script>
